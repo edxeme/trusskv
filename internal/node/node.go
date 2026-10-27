@@ -382,18 +382,22 @@ func (n *Node) broadcast() {
 	}
 }
 
-// sendHeartbeat sends one empty AppendEntries and steps down if the reply
-// carries a higher term.
+// sendHeartbeat keeps a peer current: every call carries the entries the
+// peer is missing (catch-up), or nothing when it is already up to date.
+// A reply carrying a higher term forces a step-down.
 func (n *Node) sendHeartbeat(peer string) {
 	ctx, cancel := context.WithTimeout(n.ctx, n.cfg.RPCTimeout)
 	defer cancel()
-	req := AppendRequest{Term: n.currentTerm(), LeaderID: n.cfg.ID}
-	resp, err := n.cfg.Transport.AppendEntries(ctx, peer, req)
+	resp, err := n.cfg.Transport.AppendEntries(ctx, peer, n.appendRequest(peer))
 	if err != nil {
 		return
 	}
 	if resp.Term > n.currentTerm() {
 		n.stepDown(resp.Term)
+		return
+	}
+	if resp.OK {
+		n.setMatch(peer, resp.Index)
 	}
 }
 
