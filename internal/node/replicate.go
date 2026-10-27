@@ -43,6 +43,11 @@ func (n *Node) Snapshot() map[string]store.Record {
 	return n.cfg.Store.Snapshot()
 }
 
+// Keys returns the live keys known to this node, sorted.
+func (n *Node) Keys() []string {
+	return n.cfg.Store.Keys()
+}
+
 func (n *Node) write(op, key string, value []byte) error {
 	n.mu.Lock()
 	if n.role != Leader {
