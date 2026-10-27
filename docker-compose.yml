@@ -1,0 +1,52 @@
+# A 3-node truss cluster for local development.
+# Publishes node APIs on localhost:7001-7003; peers talk on a compose network.
+services:
+  n1:
+    image: trusskv:local
+    build: .
+    command:
+      - /trusskv
+      - -id=n1
+      - -advertise=http://n1:7000
+      - -addr=:7000
+      - -data=/data
+      - -peers=http://n1:7000,http://n2:7000,http://n3:7000
+    ports:
+      - "7001:7000"
+    volumes:
+      - n1:/data
+
+  n2:
+    image: trusskv:local
+    build: .
+    command:
+      - /trusskv
+      - -id=n2
+      - -advertise=http://n2:7000
+      - -addr=:7000
+      - -data=/data
+      - -peers=http://n1:7000,http://n2:7000,http://n3:7000
+    ports:
+      - "7002:7000"
+    volumes:
+      - n2:/data
+
+  n3:
+    image: trusskv:local
+    build: .
+    command:
+      - /trusskv
+      - -id=n3
+      - -advertise=http://n3:7000
+      - -addr=:7000
+      - -data=/data
+      - -peers=http://n1:7000,http://n2:7000,http://n3:7000
+    ports:
+      - "7003:7000"
+    volumes:
+      - n3:/data
+
+volumes:
+  n1:
+  n2:
+  n3:
