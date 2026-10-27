@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: trusskv
+  labels:
+    app: trusskv
+spec:
+  # Headless: pods are reached individually via trusskv-<i>.trusskv DNS.
+  clusterIP: None
+  # Peers must resolve each other during the first election, before any
+  # readiness probe can pass.
+  publishNotReadyAddresses: true
+  selector:
+    app: trusskv
+  ports:
+    - name: http
+      port: 7000

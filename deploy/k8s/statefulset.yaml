@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: trusskv
+spec:
+  serviceName: trusskv
+  replicas: 3
+  selector:
+    matchLabels:
+      app: trusskv
+  template:
+    metadata:
+      labels:
+        app: trusskv
+    spec:
+      containers:
+        - name: trusskv
+          # Build locally first:
+          #   docker build -t trusskv:local .
+          #   kind load docker-image trusskv:local   # if using kind
+          image: trusskv:local
+          imagePullPolicy: IfNotPresent
+          args:
+            - /trusskv
+            - -id=$(POD_NAME)
+            - -advertise=http://$(POD_NAME).trusskv:7000
+            - -addr=:7000
+            - -data=/data
+            - -peers=http://trusskv-0.trusskv:7000,http://trusskv-1.trusskv:7000,http://trusskv-2.trusskv:7000
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: http
+              containerPort: 7000
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
