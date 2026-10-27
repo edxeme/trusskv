@@ -7,8 +7,10 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/edxeme/trusskv/internal/node"
+	"github.com/edxeme/trusskv/internal/web"
 )
 
 // maxValueSize bounds a single stored value (1 MiB).
@@ -95,10 +97,8 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Server) handleHome(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{
-		"service": "trusskv",
-		"status":  "/status",
-	})
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	web.Render(w, s.Node.Status(), s.Node.Snapshot(), time.Now())
 }
 
 type errBody struct {

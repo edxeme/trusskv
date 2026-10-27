@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="2">
+<title>trusskv — {{.Status.ID}}</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: #16121f; color: #c8c3d7;
+    margin: 2rem auto; max-width: 46rem; padding: 0 1rem;
+  }
+  h1 { color: #7aa2f7; font-size: 1.4rem; }
+  h2 { color: #9d7cd8; font-size: 1rem; margin-top: 2rem; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  th { text-align: left; color: #56536b; font-weight: normal; padding: 0.25rem 1rem 0.25rem 0; }
+  td { padding: 0.25rem 1rem 0.25rem 0; }
+  .role-leader { color: #9ece6a; }
+  .role-follower, .role-candidate { color: #e0af68; }
+  code { color: #73daca; }
+  .footer { margin-top: 3rem; color: #56536b; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<h1>trusskv</h1>
+<table class="meta">
+  <tr><th>node</th><td>{{.Status.ID}}</td></tr>
+  <tr><th>role</th><td class="role-{{.Status.Role}}">{{.Status.Role}}</td></tr>
+  <tr><th>term</th><td>{{.Status.Term}}</td></tr>
+  <tr><th>leader</th><td>{{if .Status.Leader}}{{.Status.Leader}}{{else}}(none){{end}}</td></tr>
+  <tr><th>last log index</th><td>{{.Status.LastIndex}}</td></tr>
+  <tr><th>live keys</th><td>{{.Status.Keys}}</td></tr>
+  <tr><th>peers</th><td>{{range .Status.Peers}}{{.}}<br>{{end}}</td></tr>
+  <tr><th>uptime</th><td>{{.Status.UptimeMS}} ms</td></tr>
+</table>
+<h2>keys</h2>
+<table class="kv">
+  <tr><th>key</th><th>value</th><th>version</th></tr>
+  {{range .Records}}
+  <tr><td>{{.Key}}</td><td><code>{{.Value}}</code></td><td>{{.Version}}</td></tr>
+  {{else}}
+  <tr><td colspan="3">no keys yet</td></tr>
+  {{end}}
+</table>
+<p class="footer">generated {{.GeneratedAt}} · bricks → bytes</p>
+</body>
+</html>
